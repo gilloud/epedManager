@@ -1,0 +1,141 @@
+// Simulate config options from your production environment by
+// customising the .env file in your project's root folder.
+require('dotenv').load();
+
+// Require keystone
+var keystone = require('keystone');
+
+var ovh = require('ovh')({
+	appKey: process.env.OVH_APP_KEY,
+	appSecret: process.env.OVH_APP_SECRET,
+	consumerKey: process.env.OVH_CONSUMER_KEY
+});
+
+// Initialise Keystone with your project's configuration.
+// See http://keystonejs.com/guide/config for available options
+// and documentation.
+
+keystone.init({
+
+	'name': 'epedGestion',
+	'brand': 'epedGestion',
+	
+	'less': 'public',
+	'static': 'public',
+	'favicon': 'public/favicon.ico',
+	'views': 'templates/views',
+	'view engine': 'jade',
+	
+	'emails': 'templates/emails',
+	
+	'auto update': true,
+	'session': true,
+	'auth': true,
+	'user model': 'User',
+	'cookie secret': '|T82]QG+Wu6%#rU6Cda!*%U)*z?vE/N%f5ti)I=JAPAB<04v389P|0Dx_2D"7]U:'
+
+});
+
+// Load your project's Models
+
+keystone.import('models');
+
+// Setup common locals for your templates. The following are required for the
+// bundled templates and layouts. Any runtime locals (that should be set uniquely
+// for each request) should be added to ./routes/middleware.js
+
+keystone.set('locals', {
+	_: require('underscore'),
+	env: keystone.get('env'),
+	utils: keystone.utils,
+	editable: keystone.content.editable
+});
+
+// Load your project's Routes
+
+keystone.set('routes', require('./routes'));
+
+// Setup common locals for your emails. The following are required by Keystone's
+// default email templates, you may remove them if you're using your own.
+
+keystone.set('email locals', {
+	logo_src: '/images/logo-email.gif',
+	logo_width: 194,
+	logo_height: 76,
+	theme: {
+		email_bg: '#f9f9f9',
+		link_color: '#2697de',
+		buttons: {
+			color: '#fff',
+			background_color: '#2697de',
+			border_color: '#1a7cb7'
+		}
+	}
+});
+
+// Setup replacement rules for emails, to automate the handling of differences
+// between development a production.
+
+// Be sure to update this rule to include your site's actual domain, and add
+// other rules your email templates require.
+
+keystone.set('email rules', [{
+	find: '/images/',
+	replace: (keystone.get('env') == 'production') ? 'http://gestion.epe-drac.fr/images/' : 'http://localhost:3000/images/'
+}, {
+	find: '/keystone/',
+	replace: (keystone.get('env') == 'production') ? 'http://gestion.epe-drac.fr/keystone/' : 'http://localhost:3000/keystone/'
+}]);
+
+// Load your project's email test routes
+
+keystone.set('email tests', require('./routes/emails'));
+
+// Configure the navigation bar in Keystone's Admin UI
+
+keystone.set('nav', {
+	'users': 'users'
+});
+
+// Start Keystone to connect to your database and initialise the web server
+
+//Désactivation du wifi
+
+var wifi_public,wifi_prive,wifi;
+
+wifi_public = {
+	"channelMode": "Auto",
+	"SSIDAdvertisementEnabled": true,
+	"SSID": process.env.EPED_WIFI_PUBLIC_NAME,
+	"securityType": "WPAandWPA2",
+	"securityKey": process.env.EPED_WIFI_PUBLIC_PASS,
+	"enabled": true
+};
+wifi_prive = {
+	"channelMode": "Auto",
+	"SSIDAdvertisementEnabled": true,
+	"SSID": process.env.EPED_WIFI_PRIVATE_NAME,
+	"securityType": "WPAandWPA2",
+	"securityKey": process.env.EPED_WIFI_PRIVATE_PASS,
+	"enabled": true
+};
+
+var CronJob = require('cron').CronJob;
+var job = new CronJob('00 00 10 * * 7', function(){
+	ovh.request('PUT', '/xdsl/'+process.env.OVH_SERVICE_NAME+'/modem/wifi/'+process.env.OVH_WIFI_NAME,
+		wifi_prive ,function (err, wifi) {
+			console.log('désactivation du wifi du dimanche matin',err,wifi);
+		});
+}, function () {
+},
+true);
+var job2 = new CronJob('00 00 12 * * 7', function(){
+	ovh.request('PUT', '/xdsl/'+process.env.OVH_SERVICE_NAME+'/modem/wifi/'+process.env.OVH_WIFI_NAME,
+		wifi_public ,function (err, wifi) {
+			console.log('réactivation du wifi du dimanche midi.',err,wifi);
+		});
+}, function () {
+},
+true);
+
+keystone.start();

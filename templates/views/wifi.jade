@@ -1,0 +1,61 @@
+extends ../layouts/default
+
+block content
+	.container: .row
+		.col-sm-12.col-md-12
+
+			h1 Gestion du wifi
+			center
+				span(style="background-color:#{data.couleur};padding:10px;margin:5px;color:white;")
+					i Le wifi est actuellement #{data.epedwifi} (#{data.wifi.SSID}).
+
+			if data.changeInProgress
+				h3 Un changement de configuration wifi est actuellement en cours. Vous ne pouvez pas en effectuer un autre actuellement.
+				h4 Si vous êtes connecté en wifi, la perte du réseau vous indiquera éventuellement la bonne prise en compte du changement.
+				br
+				center
+					img(src='images/ajax-loader.gif')
+					h4 Merci de patienter (environ 5 minutes).
+				script.
+					setTimeout(function(){
+						window.location.reload(1);
+					}, 10000);
+			else
+				hr
+				form(method='post')
+					if data.epedwifi == 'public'
+						h3 Je désire bloquer l'accès wifi une période
+						input(type='hidden' name='action' value='toprivate')
+						.row(style='margin-bottom:10px')
+							.col-sm-6.col-md-6
+								p
+									b Durée du blocage
+								i Merci d'être au plus juste afin de ne pas bloquer les autres groupes qui pourraient venir après vous.
+							.col-sm-6.col-md-6
+								br
+								select(name='duree')
+									option(value="30") 30 minutes
+									option(value="60") 1 heure
+									option(value="90") 1 heure 30 minutes
+									option(value="120") 2 heures
+									option(value="150") 2 heure 30 minutes
+									option(value="180") 3 heures
+
+						.row(style='margin-top:20px;margin-bottom:10px')
+							.col-sm-12.com-md-12
+								center
+									a(href='/')
+										button.btn Revenir à l'accueil
+									button(type='submit').btn.btn-primary Activer le blocage
+
+					if data.epedwifi == 'privé'
+
+						h3 Je désire revenir au wifi public
+						input(type='hidden' name='action' value='topublic')
+
+						.row(style='margin-top:20px;margin-bottom:10px')
+							.col-sm-12.com-md-12
+								center
+									a(href='/')
+										button.btn Revenir à l'accueil
+									button(type='submit').btn.btn-primary Revenir au wifi public
