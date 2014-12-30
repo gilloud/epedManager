@@ -37,7 +37,8 @@ exports = module.exports = function(app) {
 	// Views
 	app.get('/', routes.views.index);
 	app.all('/wifi', middleware.requireUser,routes.views.wifi);
-	
+	app.all('/me', middleware.requireUser, routes.views.me);
+
 	
 	
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:

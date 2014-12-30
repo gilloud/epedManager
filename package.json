@@ -9,8 +9,8 @@
     "dotenv": "~0.4.0",
     "ovh":"~1.1.2",
     "cron":"~1.0.5",
-    "moment":"~2.8.4"
-
+    "moment":"~2.8.4",
+    "bcrypt-nodejs":"~0.0.3"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
