@@ -121,7 +121,7 @@ wifi_prive = {
 };
 
 var CronJob = require('cron').CronJob;
-var job = new CronJob('00 00 10 * * 7', function(){
+var job = new CronJob('00 00 10 * * 0', function(){
 	ovh.request('PUT', '/xdsl/'+process.env.OVH_SERVICE_NAME+'/modem/wifi/'+process.env.OVH_WIFI_NAME,
 		wifi_prive ,function (err, wifi) {
 			console.log('désactivation du wifi du dimanche matin',err,wifi);
@@ -129,7 +129,7 @@ var job = new CronJob('00 00 10 * * 7', function(){
 }, function () {
 },
 true);
-var job2 = new CronJob('00 00 12 * * 7', function(){
+var job2 = new CronJob('00 00 12 * * 0', function(){
 	ovh.request('PUT', '/xdsl/'+process.env.OVH_SERVICE_NAME+'/modem/wifi/'+process.env.OVH_WIFI_NAME,
 		wifi_public ,function (err, wifi) {
 			console.log('réactivation du wifi du dimanche midi.',err,wifi);
